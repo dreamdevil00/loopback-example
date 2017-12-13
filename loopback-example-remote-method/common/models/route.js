@@ -1,4 +1,5 @@
 'use strict';
+const httpErrors = require('http-errors');
 
 module.exports = function(Route) {
   /**
@@ -23,5 +24,22 @@ module.exports = function(Route) {
     http: {verb: 'get', path: '/calculate'},
   });
 
+  /**
+   * 优雅地返回自定义错误
+   */
+  Route.validate = function(age, callback) {
+    if (age < 18) {
+      return callback(new httpErrors.BadRequest('年龄应当大于 18'));
+    }
+    return callback(null, {msg: 'ok'});
+  };
+  Route.remoteMethod('validate', {
+    description: '优雅的地返回错误信息',
+    accepts: [
+      {arg: 'age', type: 'number', required: true},
+    ],
+    returns: {arg: 'result', root: true, type: 'Object'},
+    http: {verb: 'post', path: '/validate'},
+  });
 };
 
